@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "module": "esnext",
+        "target": "es6",
+        "outDir": "stran/",
+        "noImplicitAny": true,
+        "preserveConstEnums": true
+    },
+    "include": ["src/app.ts"]
+}
