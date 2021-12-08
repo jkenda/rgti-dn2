@@ -79,13 +79,13 @@
             return JSON.stringify(model, null, 2)
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", _ => {
             const obj = document.querySelector("#obj")
             const json = document.querySelector("#json")
     
             json.value = convert(obj.value)
     
-            obj.addEventListener("input", () => {
+            obj.addEventListener("input", _ => {
                 json.value = convert(obj.value)
             })
         })

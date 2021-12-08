@@ -21,9 +21,9 @@ export default class Color {
         this._lights   = lights
     }
 
-    phong(vertexPosition: vec3, normal: vec3) {
+    phong(vertexPosition: vec3, vertexNormal: vec3) {
         const material = this._material
-        normal = O.normalize(normal)
+        vertexNormal = O.normalize(vertexNormal)
 
         let oColor: vec3 = [0, 0, 0]
 
@@ -31,10 +31,10 @@ export default class Color {
             const lightDir = O.normalize(O.diff(light.position, vertexPosition))
             const viewDir = O.normalize(O.scale(vertexPosition, -1))
 
-            const reflectDir = O.reflect(O.scale(lightDir, -1), normal)
+            const reflectDir = O.reflect(O.scale(lightDir, -1), vertexNormal)
 
-            const diff = Math.max(O.dot(normal, lightDir), 0.0)
-            const spec = Math.pow(Math.max(O.dot(viewDir, reflectDir), 0.0), this._material.shininess)
+            const diff = Math.max(O.dot(vertexNormal, lightDir), 0.0)
+            const spec = Math.pow(Math.max(O.dot(reflectDir, viewDir), 0.0), material.shininess)
 
             const color = O.scale(O.mul(material.color, light.color), diff + spec)
 

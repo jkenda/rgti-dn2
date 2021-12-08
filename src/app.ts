@@ -71,7 +71,7 @@ class Application {
         const rotateZ = Matrix.rotateZ(aZ)
         const translate = Matrix.translate(dX, dY, dZ)
 
-        this._mMatrix = O.mulMatrices(translate, rotateX, rotateY, rotateZ, scale)
+        this._mMatrix = O.mulMatrices(translate, rotateZ, rotateY, rotateX, scale)
         console.timeEnd("mMatrix")
     }
 
@@ -114,6 +114,8 @@ class Application {
         console.time("JSON")
         this._scene = SceneReader.readFromJson(this._textarea.value)
         this._color = new Color(this._scene?.material, this._scene?.lights)
+        document.querySelector("#nvertices").textContent = String(this._scene.vertices.length)
+        document.querySelector("#ntriangles").textContent = String(this._scene.triangles.length)
         console.timeEnd("JSON")
     }
 
@@ -160,22 +162,27 @@ class Application {
 
     public render() {
         console.time("render")
-        // 1. korak
+
+        // 1. KORAK
         console.time("transform, color")
-        
-        const vertices: {position: vec3, color: vec3}[] = []
+        const vertices: {position: vec3, color: vec3, visible: boolean}[] = []
         for (let i = 0; i < this._scene.vertices.length; i++) {
             const vInSpace  = O.mulMatrixVector(this._mMatrix, this._scene.vertices[i])
-            const nInSpace  = O.mulMatrixVector(this._mMatrix, this._scene.normals[i])
             const vInCamera = O.mulMatrixVector(this._vMatrix, vInSpace)
+            const vOnScreen = O.divPersp(O.mulMatrixVector(this._pMatrix, vInCamera))
+
+            const nInSpace  = O.mulMatrixVector(this._mMatrix, this._scene.normals[i])
+            const nInCamera = O.mulMatrixVector(this._vMatrix, nInSpace)
 
             vertices.push({
-                position: O.divPersp(O.mulMatrixVector(this._pMatrix, vInCamera)),
-                color: this._color.phong(O.xyz(vInSpace), O.xyz(nInSpace))
+                position: vOnScreen,
+                color: this._color.phong(O.xyz(vInSpace), O.xyz(nInSpace)),
+                visible: vInCamera[2] > 0 && O.dot([0, 0, -1], O.xyz(nInCamera)) >= 0
             })
         }
         console.timeEnd("transform, color")
 
+        // 2. KORAK
         console.time("sort")
         this._scene.triangles.sort((t1, t2) => {
             const [a1, b1, c1] = t1.map(x => vertices[x].position)
@@ -188,47 +195,50 @@ class Application {
 
         console.time("draw")
         this._ctx.clearRect(-400, -300, 800, 600)
-        this._scene.triangles.forEach((triangle) => {
+        this._scene.triangles.forEach(triangle => {
             const [a, b, c] = triangle
             
-            // koordinate točk trikotnika
-            const [aX, aY, aZ] = vertices[a].position
-            const [bX, bY, bZ] = vertices[b].position
-            const [cX, cY, cZ] = vertices[c].position
+            // koordinate oglišč trikotnika
+            const [aX, aY] = vertices[a].position
+            const [bX, bY] = vertices[b].position
+            const [cX, cY] = vertices[c].position
             
-            if (aZ <= 0 || bZ <= 0 || cZ <= 0) return
+            if (!vertices[a].visible
+             && !vertices[b].visible
+             && !vertices[c].visible) return
 
-            // barve točk trikotnika
+            // barve oglišč trikotnika
             const [aR, aG, aB] = vertices[a].color
             const [bR, bG, bB] = vertices[b].color
             const [cR, cG, cB] = vertices[c].color
 
             let grad
 
-            // 2. korak
-            this._ctx.beginPath()
-            this._ctx.moveTo(aX, aY)
+            // 1.KORAK
             grad = this._ctx.createLinearGradient(aX, aY, bX, bY)
             grad.addColorStop(0, `rgb(${aR},${aG},${aB})`)
             grad.addColorStop(1, `rgb(${bR},${bG},${bB})`)
-            this._ctx.lineTo(bX, bY)
             this._ctx.strokeStyle = grad
+            this._ctx.beginPath()
+            this._ctx.moveTo(aX, aY)
+            this._ctx.lineTo(bX, bY)
             this._ctx.stroke()
             
             grad = this._ctx.createLinearGradient(bX, bY, cX, cY)
             grad.addColorStop(0, `rgb(${bR},${bG},${bB})`)
             grad.addColorStop(1, `rgb(${cR},${cG},${cB})`)
-            this._ctx.lineTo(cX, cY)
             this._ctx.strokeStyle = grad
+            this._ctx.lineTo(cX, cY)
             this._ctx.stroke()
             
             grad = this._ctx.createLinearGradient(cX, cY, aX, aY)
             grad.addColorStop(0, `rgb(${cR},${cG},${cB})`)
             grad.addColorStop(1, `rgb(${aR},${aG},${aB})`)
-            this._ctx.closePath()
             this._ctx.strokeStyle = grad
+            this._ctx.closePath()
             this._ctx.stroke()
             
+            // 2. KORAK
             const [red, green, blue] = O.center(vertices[a].color, vertices[b].color, vertices[c].color)
             
             this._ctx.fillStyle = `rgb(${red},${green},${blue})`
@@ -239,7 +249,7 @@ class Application {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", _ => {
 
     const canvas = document.querySelector("canvas")
     const textarea = document.querySelector("textarea")
@@ -251,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // sprememba teksta modela
-    textarea.addEventListener("input", () => {
+    textarea.addEventListener("input", _ => {
         app.updateJSON()
         if (app.hasScene) {
             app.update()
@@ -260,8 +270,8 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 
     // premikanje modela z miško
-    canvas.addEventListener("contextmenu", (event) =>  event.preventDefault())
-    canvas.addEventListener("mousedown", (event) => {
+    canvas.addEventListener("contextmenu", event =>  event.preventDefault())
+    canvas.addEventListener("mousedown", event => {
         event.preventDefault()
         if (!app.hasScene) return
         app.mouseDown = event.button
@@ -278,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 break
         }
     })
-    canvas.addEventListener("mousemove", (event) => {
+    canvas.addEventListener("mousemove", event => {
         if (app.mouseDown == mouseBtn.none) return
 
         const dx = event.movementX
@@ -286,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         switch (app.mouseDown) {
             case mouseBtn.rotModel:
-                app.rotateModel(-dy*mulRot.y, -dx*mulRot.x, 0)
+                app.rotateModel(-dy*mulRot.y, dx*mulRot.x, 0)
                 break;
             case mouseBtn.rotCamera:
                 app.rotateCamera(-dy*mulRot.y, dx*mulRot.x, 0)
@@ -296,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
         }
     })
-    canvas.addEventListener("mouseup", () => {
+    canvas.addEventListener("mouseup", _ => {
         app.mouseDown = mouseBtn.none
         canvas.style.cursor = app.cursorStyle
         if (app.mouseLocked) {
@@ -304,7 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
             app.mouseLocked = false
         }
     })
-    canvas.addEventListener("wheel", (event) => {
+    canvas.addEventListener("wheel", event => {
         event.preventDefault()
         if (event.deltaY < 0)
             canvas.style.cursor = "zoom-in"
@@ -317,7 +327,7 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 
     // premikanje modela s tipkovnico
-    document.addEventListener("keydown", (event) => {
+    document.addEventListener("keydown", event => {
         if (!app.hasScene) return
         switch (event.key) {
             case keyboardKey.up:

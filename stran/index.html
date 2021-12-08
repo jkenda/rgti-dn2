@@ -7,12 +7,15 @@
             html, body {
                 height: 100%;
                 padding: 0; margin: 0;
+                font-family: monospace;
+                font-size: 12pt;
             }
             .horizontal {
                 display: flex;
             }
             canvas {
                 border: 1px solid black;
+                cursor: grab;
             }
             textarea {
                 margin: 0;
@@ -29,6 +32,17 @@
         <div class="horizontal">
             <canvas width="800px", height="600px"></canvas>
             <textarea></textarea>
+        </div>
+        <div>
+            levi gumb: rotiraj kamero,
+            srednji gumb: premakni model,
+            desni gumb: rotiraj model.<br>
+            kolešček: premikaj kamero po Z,
+            WASD: premikaj kamero po X in Y
+        </div>
+        <div>
+            vertices: <span id="nvertices"></span>
+            triangles: <span id="ntriangles"></span>
         </div>
     </body>
 </html>

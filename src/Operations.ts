@@ -41,8 +41,8 @@ export default class Operations {
 
     static scale = ([x, y, z]: vec3, k: number): vec3 => [k*x, k*y, k*z]
 
-    static reflect = (i: vec3, n: vec3) => 
-        Operations.diff(Operations.scale(n, 2 * Operations.dot(i, n)), i)
+    static reflect = (l: vec3, n: vec3) => 
+        Operations.diff(Operations.scale(n, 2 * Operations.dot(l, n)), l)
 
     static mulMatrixVector = (M: Matrix, v: vec4): vec4 => [
         Operations.dot(M.row(0), v),
