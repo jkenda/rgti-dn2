@@ -1,4 +1,4 @@
-# rgti2
+# RGTI DN2
 Homework 2/2 for RGTI class (Computer Graphics and Game Technology)
 
 This is a software renderer for one mesh.
@@ -6,8 +6,8 @@ This is a software renderer for one mesh.
 ## Usage
 
 - remotely:
-    - connect to `rgti-dn2.pages.dev`
-- locally
+    - connect to [rgti-dn2.pages.dev]()
+- locally:
     - clone the repository: `https://github.com/jkenda/rgti-dn2.git`
     - install dependencies: `npm install`
     - build and start the page: `npm run dev`
