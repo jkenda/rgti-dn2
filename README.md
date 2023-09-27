@@ -6,7 +6,7 @@ This is a software renderer for one mesh.
 ## Usage
 
 - remotely:
-    - connect to [rgti-dn2.pages.dev]()
+    - connect to https://rgti-dn2.pages.dev
 - locally:
     - clone the repository: `https://github.com/jkenda/rgti-dn2.git`
     - install dependencies: `npm install`
