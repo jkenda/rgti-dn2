@@ -112,10 +112,13 @@ class Application {
     // posodobi objekt scene iz JSONa
     public updateJSON() {
         console.time("JSON")
-        this._scene = SceneReader.readFromJson(this._textarea.value)
-        this._color = new Color(this._scene?.material, this._scene?.lights)
-        document.querySelector("#nvertices").textContent = String(this._scene.vertices.length)
-        document.querySelector("#ntriangles").textContent = String(this._scene.triangles.length)
+        try {
+            this._scene = SceneReader.readFromJson(this._textarea.value)
+            this._color = new Color(this._scene?.material, this._scene?.lights)
+            document.querySelector("#nvertices").textContent = String(this._scene.vertices.length)
+            document.querySelector("#ntriangles").textContent = String(this._scene.triangles.length)
+        } catch (e) {
+        }
         console.timeEnd("JSON")
     }
 

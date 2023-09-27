@@ -1,0 +1,35 @@
+{
+  "name": "rgti-dn2",
+  "version": "1.0.1",
+  "description": "A software renderer that renders a mesh from JSON.",
+  "main": "dist/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "npx tsc",
+    "dev": "npx tsc && npx http-server dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jkenda/rgti-dn2.git"
+  },
+  "keywords": [
+    "renderer",
+    "JS",
+    "homework"
+  ],
+  "author": "Jakob Kenda",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jkenda/rgti-dn2/issues"
+  },
+  "homepage": "https://github.com/jkenda/rgti-dn2#readme",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "dependencies": {
+    "typescript": "^5.2.2"
+  }
+}
